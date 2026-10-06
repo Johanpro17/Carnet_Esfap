@@ -1,59 +1,157 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Sistema de Carnets ESFAP
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistema de identificación institucional para la Escuela Superior de Formación Artística Pública. Emite carnets digitales con código QR verificable por cualquier dispositivo, sin necesidad de instalar una aplicación.
 
-## About Laravel
+## Requisitos
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+| Componente | Versión |
+|---|---|
+| PHP | 8.2 o superior |
+| Laravel | 12 |
+| MySQL | 8 o superior (vía XAMPP) |
+| Composer | 2.x |
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Instalación
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 1. Clonar el repositorio
 
-## Learning Laravel
+```bash
+git clone https://github.com/Johanpro17/Carnet_Esfap.git
+cd Carnet_Esfap
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### 2. Dependencias
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```bash
+composer install
+npm install
+npm run build
+```
 
-## Laravel Sponsors
+### 3. Configurar Apache
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+El `DocumentRoot` debe apuntar a la carpeta `public`, nunca a la raíz del proyecto:
 
-### Premium Partners
+```apache
+DocumentRoot "C:/xampp/htdocs/Johan/carnet_Esfap/public"
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+En `httpd.conf` hay que habilitar `mod_rewrite` y `mod_ssl` si se va a usar HTTPS:
 
-## Contributing
+```apache
+LoadModule rewrite_module modules/mod_rewrite.so
+LoadModule ssl_module modules/mod_ssl.so
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 4. Variables de entorno
 
-## Code of Conduct
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Ajustar en `.env` los datos de conexión y las URLs:
 
-## Security Vulnerabilities
+```ini
+DB_DATABASE=carnet_esfap_v2
+DB_USERNAME=root
+DB_PASSWORD=
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+APP_URL=https://localhost
+QR_BASE_URL=https://192.168.1.100
+```
 
-## License
+`QR_BASE_URL` es la dirección que se codifica dentro de los códigos QR. Si se deja vacía, el sistema detecta la IP de la red local automáticamente, pero conviene fijarla para que los códigos funcionen desde los celulares.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 5. Base de datos
+
+```bash
+mysql -u root < database/carnet_esfap_v2.sql
+```
+
+### 6. Permisos de escritura
+
+`storage/` y `bootstrap/cache/` deben ser escribibles por Apache.
+
+### 7. Iniciar
+
+Desde el panel de XAMPP: **Start** en Apache y MySQL. Luego abrir `https://localhost`.
+
+## Acceso
+
+El sistema **reconoce el rol automáticamente**: solo se ingresa la contraseña.
+
+- **Administradores** → la contraseña del usuario `admin` (hash bcrypt, ver `database/carnet_esfap_v2.sql`).
+- **Alumnos** → su correo institucional como contraseña.
+
+## Verificación por QR
+
+El QR codifica una URL con el formato `https://<host>/verificar/<token>/pdf`. Al escanearse muestra el carnet con los datos del alumno, la vigencia y el estado, y permite descargar el PDF.
+
+La búsqueda manual y la lectura de una imagen del QR están en `/verificar` (usa `jsQR` del lado del cliente).
+
+## HTTPS en local
+
+El certificado autofirmado cubre `localhost`, `127.0.0.1` y la IP de la red local. Está en `C:\xampp\apache\conf\ssl.crt\server.crt`. También hay que agregarlo al almacén de certificados del equipo y, para que los celulares no muestren avisos, al del teléfono.
+
+## Estructura
+
+```
+app/
+  Http/Controllers/    AlumnoController, AuthController, CarnetController,
+                       DashboardController, QrController
+  Http/Middleware/     SinCache, VerificarAdmin, VerificarPropio
+  Lib/phpqrcode/       Generación de QR en PNG
+  Models/              Alumno, Carnet, Carrera, Personal, Usuario, Rol, Auditoria
+  Services/            AuditoriaService
+resources/views/
+  alumnos/             index, form, carnet
+  auth/                login
+  carnets/             card (plantilla imprimible), verificar
+  layouts/             app (panel con sesión), publica (verificación)
+  partials/            historial (bloqueo del botón atrás)
+routes/web.php         Todas las rutas
+database/              Esquema y datos iniciales
+```
+
+## Base de datos
+
+| Tabla | Contenido |
+|---|---|
+| `alumnos` | Datos personales y estado (`ACTIVO`, `INACTIVO`, `EGRESADO`, `RETIRADO`, `SUSPENDIDO`) |
+| `carnets` | Emisión, periodo, semestre, vigencia y `token_qr` |
+| `carnet_vencimientos` | Historial de vencimientos |
+| `carreras` | Carreras disponibles |
+| `personal` | Docentes y administrativos |
+| `usuarios` | Cuentas de acceso |
+| `roles` / `roles_usuario` | `ADMIN` y `ALUMNO` |
+| `usuario_personal` | Vínculo usuario ↔ personal |
+| `auditorias` / `auditoria_acciones` | Registro de operaciones |
+
+Los alumnos usan `deleted_at` (soft delete), por eso los borrados no eliminan filas de forma definitiva.
+
+## Rutas
+
+| Ruta | Acceso | Descripción |
+|---|---|---|
+| `/` | público | Portada |
+| `/login` | público | Ingreso |
+| `/verificar` | público | Buscador y lector de QR |
+| `/verificar/{token}` | público | Datos del carnet |
+| `/verificar/{token}/pdf` | público | Carnet en PDF |
+| `/dashboard` | con sesión | Panel |
+| `/alumnos` | admin | Listado y filtros |
+| `/alumnos/crear` | admin | Emisión de carnet |
+| `/alumnos/{id}/editar` | dueño o admin | Edición de datos |
+| `/alumnos/{id}/carnet` | dueño | Carnet del alumno |
+
+## Notas de seguridad
+
+- `APP_DEBUG=false` en producción: los errores no se muestran al usuario.
+- El middleware `SinCache` envía `no-store, no-cache` para que el navegador no repinte contenido de sesiones anteriores.
+- Las vistas incluyen un bloqueo del botón atrás del navegador (`resources/views/partials/historial.blade.php`). Es una medida de usabilidad, **no una barrera real**: la seguridad depende de la sesión en el servidor, que rechaza cualquier POST sin cookie válida.
+- `public/uploads/` está en `.gitignore`: las fotos de alumnos no se versionan.
+
+## Licencia
+
+Uso interno de la ESFAP.
