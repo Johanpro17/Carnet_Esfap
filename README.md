@@ -1,157 +1,186 @@
-# Sistema de Carnets ESFAP
+# Carnets ESFAP
 
-Sistema de identificación institucional para la Escuela Superior de Formación Artística Pública. Emite carnets digitales con código QR verificable por cualquier dispositivo, sin necesidad de instalar una aplicación.
+Sistema de carnets estudiantiles con verificación por código QR, desarrollado en **PHP nativo** (sin frameworks ni Composer) sobre **MySQL**. Funciona en Windows (XAMPP) y en Linux con Apache o Nginx.
 
 ## Requisitos
 
-| Componente | Versión |
+| Componente | Versión / Detalle |
 |---|---|
-| PHP | 8.2 o superior |
-| Laravel | 12 |
-| MySQL | 8 o superior (vía XAMPP) |
-| Composer | 2.x |
+| PHP | **8.0 o superior** |
+| Extensiones PHP | `pdo_mysql`, `fileinfo`, **`gd`** |
+| MySQL / MariaDB | 5.7+ / 10.2+ |
+| Servidor web | Apache con `mod_rewrite` **y `AllowOverride All`**, o Nginx |
+| Navegador | Moderno (cualquiera) |
 
-## Instalación
+> `gd` es obligatorio para generar las imágenes PNG de los códigos QR. `fileinfo` se usa al validar las fotos subidas.
 
-### 1. Clonar el repositorio
+## Estructura del proyecto
 
-```bash
-git clone https://github.com/Johanpro17/Carnet_Esfap.git
-cd Carnet_Esfap
+```
+carnet_Esfap/
+├── app/
+│   ├── Lib/phpqrcode/        Generador de QR (incluido)
+│   └── native/               Núcleo de la aplicación
+│       ├── bootstrap.php     Configuración, sesión, BD, helpers
+│       ├── router.php        Definición de rutas y controladores
+│       └── views/            Plantillas PHP
+├── database/carnet_esfap_v2.sql   Esquema + datos iniciales
+├── public/                   ← DocumentRoot del sitio
+│   ├── index.php             Punto de entrada
+│   ├── .htaccess             Reescritura de URLs (Apache)
+│   ├── css/, imagenes/, vendor/, uploads/
+├── tests/run.php             Comprobaciones
+├── .env.example              Plantilla de configuración
+└── index.php                 Entrada alternativa (si el DocumentRoot es la raíz del proyecto)
 ```
 
-### 2. Dependencias
+## Arranque rápido en XAMPP (Windows)
 
-```bash
-composer install
-npm install
-npm run build
-```
+1. Copia la carpeta del proyecto dentro de `htdocs`, por ejemplo `C:\xampp\htdocs\carnet_Esfap`.
+2. Inicia **Apache** y **MySQL** desde el panel de XAMPP.
+3. Abre en el navegador: `http://localhost/carnet_Esfap/public/`
 
-### 3. Configurar Apache
-
-El `DocumentRoot` debe apuntar a la carpeta `public`, nunca a la raíz del proyecto:
-
-```apache
-DocumentRoot "C:/xampp/htdocs/Johan/carnet_Esfap/public"
-```
-
-En `httpd.conf` hay que habilitar `mod_rewrite` y `mod_ssl` si se va a usar HTTPS:
-
-```apache
-LoadModule rewrite_module modules/mod_rewrite.so
-LoadModule ssl_module modules/mod_ssl.so
-```
-
-### 4. Variables de entorno
-
-```bash
-cp .env.example .env
-php artisan key:generate
-```
-
-Ajustar en `.env` los datos de conexión y las URLs:
-
-```ini
-DB_DATABASE=carnet_esfap_v2
-DB_USERNAME=root
-DB_PASSWORD=
-
-APP_URL=https://localhost
-QR_BASE_URL=https://192.168.1.100
-```
-
-`QR_BASE_URL` es la dirección que se codifica dentro de los códigos QR. Si se deja vacía, el sistema detecta la IP de la red local automáticamente, pero conviene fijarla para que los códigos funcionen desde los celulares.
-
-### 5. Base de datos
-
-```bash
-mysql -u root < database/carnet_esfap_v2.sql
-```
-
-### 6. Permisos de escritura
-
-`storage/` y `bootstrap/cache/` deben ser escribibles por Apache.
-
-### 7. Iniciar
-
-Desde el panel de XAMPP: **Start** en Apache y MySQL. Luego abrir `https://localhost`.
+No hace falta importar la base de datos a mano: al primer arranque el sistema **crea la base `carnet_esfap_v2` e importa `database/carnet_esfap_v2.sql` automáticamente** si detecta que no existe (opción `DB_AUTO_SETUP`, activada por defecto). Usa el usuario de MySQL habitual de XAMPP (`root` sin contraseña).
 
 ## Acceso
 
-El sistema **reconoce el rol automáticamente**: solo se ingresa la contraseña.
-
-- **Administradores** → la contraseña del usuario `admin` (hash bcrypt, ver `database/carnet_esfap_v2.sql`).
-- **Alumnos** → su correo institucional como contraseña.
-
-## Verificación por QR
-
-El QR codifica una URL con el formato `https://<host>/verificar/<token>/pdf`. Al escanearse muestra el carnet con los datos del alumno, la vigencia y el estado, y permite descargar el PDF.
-
-La búsqueda manual y la lectura de una imagen del QR están en `/verificar` (usa `jsQR` del lado del cliente).
-
-## HTTPS en local
-
-El certificado autofirmado cubre `localhost`, `127.0.0.1` y la IP de la red local. Está en `C:\xampp\apache\conf\ssl.crt\server.crt`. También hay que agregarlo al almacén de certificados del equipo y, para que los celulares no muestren avisos, al del teléfono.
-
-## Estructura
-
-```
-app/
-  Http/Controllers/    AlumnoController, AuthController, CarnetController,
-                       DashboardController, QrController
-  Http/Middleware/     SinCache, VerificarAdmin, VerificarPropio
-  Lib/phpqrcode/       Generación de QR en PNG
-  Models/              Alumno, Carnet, Carrera, Personal, Usuario, Rol, Auditoria
-  Services/            AuditoriaService
-resources/views/
-  alumnos/             index, form, carnet
-  auth/                login
-  carnets/             card (plantilla imprimible), verificar
-  layouts/             app (panel con sesión), publica (verificación)
-  partials/            historial (bloqueo del botón atrás)
-routes/web.php         Todas las rutas
-database/              Esquema y datos iniciales
-```
-
-## Base de datos
-
-| Tabla | Contenido |
-|---|---|
-| `alumnos` | Datos personales y estado (`ACTIVO`, `INACTIVO`, `EGRESADO`, `RETIRADO`, `SUSPENDIDO`) |
-| `carnets` | Emisión, periodo, semestre, vigencia y `token_qr` |
-| `carnet_vencimientos` | Historial de vencimientos |
-| `carreras` | Carreras disponibles |
-| `personal` | Docentes y administrativos |
-| `usuarios` | Cuentas de acceso |
-| `roles` / `roles_usuario` | `ADMIN` y `ALUMNO` |
-| `usuario_personal` | Vínculo usuario ↔ personal |
-| `auditorias` / `auditoria_acciones` | Registro de operaciones |
-
-Los alumnos usan `deleted_at` (soft delete), por eso los borrados no eliminan filas de forma definitiva.
-
-## Rutas
-
-| Ruta | Acceso | Descripción |
+| Rol | Usuario | Contraseña |
 |---|---|---|
-| `/` | público | Portada |
-| `/login` | público | Ingreso |
-| `/verificar` | público | Buscador y lector de QR |
-| `/verificar/{token}` | público | Datos del carnet |
-| `/verificar/{token}/pdf` | público | Carnet en PDF |
-| `/dashboard` | con sesión | Panel |
-| `/alumnos` | admin | Listado y filtros |
-| `/alumnos/crear` | admin | Emisión de carnet |
-| `/alumnos/{id}/editar` | dueño o admin | Edición de datos |
-| `/alumnos/{id}/carnet` | dueño | Carnet del alumno |
+| Administrador | `admin` | `123esf@p` |
+| Alumno | su correo institucional | — |
 
-## Notas de seguridad
+> Los alumnos escriben su **correo** en el campo de contraseña del formulario de ingreso (no usan contraseña propia).
 
-- `APP_DEBUG=false` en producción: los errores no se muestran al usuario.
-- El middleware `SinCache` envía `no-store, no-cache` para que el navegador no repinte contenido de sesiones anteriores.
-- Las vistas incluyen un bloqueo del botón atrás del navegador (`resources/views/partials/historial.blade.php`). Es una medida de usabilidad, **no una barrera real**: la seguridad depende de la sesión en el servidor, que rechaza cualquier POST sin cookie válida.
-- `public/uploads/` está en `.gitignore`: las fotos de alumnos no se versionan.
+## Instalación manual (Linux / servidor)
 
-## Licencia
+1. Copia el proyecto al servidor (por ejemplo `/var/www/carnet_esfap`).
+2. (Opcional) Importa `database/carnet_esfap_v2.sql`. Si lo omites, `DB_AUTO_SETUP` lo hará solo.
+3. Copia `.env.example` como `.env` y configura:
+   ```env
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_DATABASE=carnet_esfap_v2
+   DB_USERNAME=tu_usuario
+   DB_PASSWORD=tu_clave
+   DB_AUTO_SETUP=true
+   APP_DEBUG=false
+   QR_BASE_URL=https://carnets.tu-dominio.edu.pe
+   ```
+4. Apunta el **DocumentRoot al directorio `public/`** (ver configuración abajo).
+5. Da permisos de escritura a `public/uploads` (para las fotos de los alumnos).
+6. Abre el sitio en el navegador.
 
-Uso interno de la ESFAP.
+## Configuración de Apache
+
+`.htaccess` y las URLs limpias requieren `mod_rewrite` y `AllowOverride All`.
+Ejemplo de VirtualHost (Windows o Linux):
+
+```apache
+<VirtualHost *:80>
+    ServerName carnets.local
+    DocumentRoot "C:/xampp/htdocs/carnet_Esfap/public"
+
+    <Directory "C:/xampp/htdocs/carnet_Esfap/public">
+        AllowOverride All
+        Require all granted
+    </Directory>
+</VirtualHost>
+```
+
+En Linux, además habilita los módulos y recarga Apache:
+
+```bash
+sudo a2enmod rewrite
+sudo systemctl restart apache2
+```
+
+## Configuración de Nginx
+
+Nginx no lee `.htaccess`; usa esta configuración equivalente (archivo `deploy/nginx.conf.example`):
+
+```nginx
+server {
+    listen 80;
+    server_name carnets.tu-dominio.edu.pe;
+    root /var/www/carnet_Esfap/public;
+    index index.php;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        include /etc/nginx/fastcgi_params;
+        fastcgi_pass unix:/run/php/php8.2-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    }
+
+    location ~* \.(css|js|png|jpg|jpeg|gif|svg|ico|woff2?)$ {
+        expires 30d;
+        access_log off;
+    }
+}
+```
+
+## Prueba rápida con el servidor embebido de PHP
+
+Sin configurar Apache/Nginx:
+
+```bash
+php -S localhost:8000 -t public
+```
+
+Luego abre `http://localhost:8000`.
+
+## Comprobación
+
+Con MySQL activo:
+
+```bash
+php tests/run.php          # Suite de pruebas (5/5)
+curl http://localhost/up   # Devuelve "OK" si la BD responde
+```
+
+## Códigos QR y PDF
+
+- `QR_BASE_URL` define el host que se graba en los QR. Si queda vacío se detecta automáticamente.
+- La lectura de imágenes QR usa `public/vendor/jsqr`. La generación usa `app/Lib/phpqrcode` (requiere GD).
+- La ruta `/verificar/{token}/pdf` abre una versión imprimible; se imprime o se guarda como PDF desde el navegador, sin paquetes externos.
+
+## Rutas principales
+
+| Ruta | Acceso | Función |
+|---|---|---|
+| `/` | Público | Inicio |
+| `/login` | Público | Ingreso |
+| `/verificar` | Público | Búsqueda y lectura QR |
+| `/verificar/{token}` | Público | Validación del carnet |
+| `/verificar/{token}/pdf` | Público | Vista para imprimir o guardar PDF |
+| `/dashboard` | Sesión | Panel administrativo |
+| `/alumnos` | Administrador | Búsqueda y gestión de alumnos |
+| `/alumnos/crear` | Administrador | Registro y emisión de carnet |
+| `/alumnos/{id}/editar` | Titular o administrador | Edición autorizada |
+| `/alumnos/{id}/carnet` | Titular o administrador | Ver carnet |
+| `/reportes` | Administrador | Reportes por estado académico |
+| `/up` | Público | Health check (texto plano) |
+
+La base de datos conserva eliminaciones lógicas mediante `deleted_at`.
+
+## Despliegue (checklist)
+
+- [ ] DocumentRoot apuntando a `public/` (o usar la config de Apache/Nginx de ejemplo).
+- [ ] `.htaccess`/`try_files` activos (URLs limpias funcionan: `/login`, `/reportes`, ...).
+- [ ] `.env` creado y con credenciales correctas; `APP_DEBUG=false` en producción.
+- [ ] `QR_BASE_URL` con el dominio real que escanearán los teléfonos.
+- [ ] Extensiones PHP `pdo_mysql`, `fileinfo`, `gd` habilitadas.
+- [ ] `public/uploads` con permisos de escritura (`chmod 775`, usuario del servidor web).
+- [ ] Base de datos creada: automática con `DB_AUTO_SETUP=true`, o importada a mano desde `database/carnet_esfap_v2.sql`.
+- [ ] HTTPS recomendado (y `secure` en cookies se activa automáticamente).
+
+## Seguridad
+
+- **No subas `.env` al repositorio**: contiene credenciales. Ya está excluido en `.gitignore`.
+- Las contraseñas de usuario se almacenan con `password_hash()` y se validan con `password_verify()`.
+- Todas las peticiones POST usan token CSRF.
+- Las consultas usan sentencias preparadas (PDO).
+- Las fotos de los alumnos se guardan en `public/uploads` y no se versionan.

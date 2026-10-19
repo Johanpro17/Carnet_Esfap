@@ -1,0 +1,34 @@
+# Carnets ESFAP - Configuración de ejemplo para Nginx + PHP-FPM
+# Copia/adapta este bloque y colócalo en /etc/nginx/sites-available/carnets-ESFAP
+# Ajusta server_name, root y la versión de php-fpm.
+
+server {
+    listen 80;
+    server_name carnets.tu-dominio.edu.pe;
+
+    root /var/www/carnet_Esfap/public;
+    index index.php;
+
+    # URLs limpias -> front controller
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    # PHP-FPM
+    location ~ \.php$ {
+        include /etc/nginx/fastcgi_params;
+        fastcgi_pass unix:/run/php/php8.2-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    }
+
+    # Estáticos con caché
+    location ~* \.(css|js|png|jpg|jpeg|gif|svg|ico|woff|woff2)$ {
+        expires 30d;
+        access_log off;
+    }
+
+    # No exponer archivos ocultos
+    location ~ /\.(?!well-known) {
+        deny all;
+    }
+}

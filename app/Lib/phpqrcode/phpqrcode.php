@@ -207,7 +207,7 @@ class QRtools
     //----------------------------------------------------------------------
     public static function clearCache()
     {
-        self::$frames = array();
+        QRspec::$frames = array();
     }
 
     //----------------------------------------------------------------------
@@ -1264,7 +1264,7 @@ class QRinputItem
     {
         try {
 
-            $bs = new QRbitrtream();
+            $bs = new QRbitstream();
 
             $bs->appendNum(4, 0x8);
             $bs->appendNum(QRspec::lengthIndicator(QR_MODE_KANJI, $version), (int)($this->size / 2));
@@ -1407,7 +1407,7 @@ class QRinputItem
 class QRinput
 {
 
-    public $items;
+    public $items = array();
 
     private $version;
     private $level;
@@ -1495,7 +1495,7 @@ class QRinput
         $buf = array($size, $index, $parity);
 
         try {
-            $entry = new QRinputItem(QR_MODE_STRUCTURE, 3, buf);
+            $entry = new QRinputItem(QR_MODE_STRUCTURE, 3, $buf);
             array_unshift($this->items, $entry);
             return 0;
         } catch (Exception $e) {
@@ -1721,7 +1721,7 @@ class QRinput
     }
 
     //----------------------------------------------------------------------
-    public function estimateBitsModeKanji($size)
+    public static function estimateBitsModeKanji($size)
     {
         return (int)(($size / 2) * 13);
     }
@@ -2375,7 +2375,7 @@ class QRsplit
         if ($ret < 0)
             return -1;
 
-        return $run;
+        return $p;
     }
 
     //----------------------------------------------------------------------
@@ -2450,7 +2450,7 @@ class QRsplit
                     $length = $this->eatAn();
                     break;
                 case QR_MODE_KANJI:
-                    if ($hint == QR_MODE_KANJI)
+                    if ($this->modeHint == QR_MODE_KANJI)
                         $length = $this->eatKanji();
                     else    $length = $this->eat8();
                     break;
@@ -3220,8 +3220,6 @@ class QRrawcode
     //----------------------------------------------------------------------
     public function getCode()
     {
-        $ret;
-
         if ($this->count < $this->dataLength) {
             $row = $this->count % $this->blocks;
             $col = $this->count / $this->blocks;
@@ -3335,7 +3333,7 @@ class QRcode
     //----------------------------------------------------------------------
     public function encodeString8bit($string, $version, $level)
     {
-        if (string == NULL) {
+        if ($string === null || $string === '') {
             throw new Exception('empty string!');
             return NULL;
         }
@@ -3343,7 +3341,7 @@ class QRcode
         $input = new QRinput($version, $level);
         if ($input == NULL) return NULL;
 
-        $ret = $input->append($input, QR_MODE_8, strlen($string), str_split($string));
+        $ret = $input->append(QR_MODE_8, strlen($string), str_split($string));
         if ($ret < 0) {
             unset($input);
             return NULL;

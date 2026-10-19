@@ -622,12 +622,16 @@ textarea {
 .eyebrow { display: inline-flex; align-items: center; gap: .4rem; color: var(--primary); font-size: .78rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
 .eyebrow i { font-size: .98rem; }
 
-.metric-card { min-height: 142px; border: 1px solid rgba(90, 12, 112, .07); background: rgba(255,255,255,.92); }
-.metric-card .card-body { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 1rem; padding: 1.35rem; }
-.metric-card span { display: block; font-size: .84rem; color: #64748b; font-weight: 600; }
-.metric-card h2 { margin: .15rem 0 0; font-size: 2rem; font-weight: 700; color: #3d0650; }
-.metric-card small { color: #8696a8; font-size: .72rem; line-height: 1.25; display: block; }
-.metric-card .metric-icon { width: 44px; height: 44px; border-radius: 13px; flex: 0 0 44px; display: grid; place-items: center; font-size: 1.2rem; }
+.metric-card { position: relative; min-height: 138px; border: 1px solid rgba(90, 12, 112, .08); background: linear-gradient(180deg, #ffffff 0%, #fbf8fd 100%); overflow: hidden; }
+.metric-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--primary) 0%, var(--gold) 100%); opacity: .9; }
+.metric-card::after { content: ''; position: absolute; right: -30px; top: -30px; width: 110px; height: 110px; border-radius: 50%; background: radial-gradient(circle, rgba(90,12,112,.07), transparent 70%); pointer-events: none; }
+.metric-card .card-body { display: flex; align-items: center; gap: 1.05rem; padding: 1.5rem 1.35rem; position: relative; z-index: 1; }
+.metric-card .metric-text { display: flex; flex-direction: column; min-width: 0; }
+.metric-card span { display: block; font-size: .86rem; color: #64748b; font-weight: 600; }
+.metric-card h2 { margin: .1rem 0 0; font-size: 2.1rem; font-weight: 700; color: #3d0650; line-height: 1.05; }
+.metric-card small { color: #8696a8; font-size: .74rem; line-height: 1.25; display: block; }
+.metric-card a { font-size: .8rem; font-weight: 600; }
+.metric-card .metric-icon { width: 56px; height: 56px; border-radius: 16px; flex: 0 0 56px; display: grid; place-items: center; font-size: 1.7rem; box-shadow: 0 8px 18px rgba(90, 12, 112, .16); }
 .metric-primary .metric-icon { color: var(--primary); background: #ecd9f2; }
 .metric-success .metric-icon { color: #167a43; background: #e3f5e9; }
 .metric-warning .metric-icon { color: #9a6500; background: #fff2d2; }
@@ -947,6 +951,720 @@ a:hover {
     max-width: 100%;
     height: auto !important;
     overflow-x: auto;
+  }
+}
+
+/* ============================================
+   CARNET ESTUDIANTIL (id-card)
+   ============================================ */
+.id-card {
+  width: min(100%, 340px);
+  margin: 1rem auto;
+  background: #ffffff;
+  border: 2px solid var(--primary);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 18px 44px rgba(61, 6, 80, 0.28);
+  font-family: 'Poppins', 'Segoe UI', sans-serif;
+  color: #271549;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 480px;
+}
+
+.id-card header {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: linear-gradient(120deg, var(--primary-dark) 0%, var(--primary) 55%, var(--primary-light) 100%);
+  color: #fff;
+  min-height: 56px;
+  z-index: 2;
+}
+
+.id-card header::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--gold) 0%, var(--gold-light) 50%, var(--gold) 100%);
+}
+
+.id-card header .brand-logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  background: #fff;
+  border-radius: 50%;
+  padding: 3px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+}
+
+.id-card header .brand-text {
+  display: grid;
+  gap: 1px;
+  line-height: 1.15;
+}
+
+.id-card header .brand-text strong {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.id-card header .brand-text span {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 0.04em;
+}
+
+.id-card header .validity {
+  font-size: 9.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  padding: 3px 8px;
+  border-radius: 50rem;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.id-card header .validity.valid {
+  color: #b6f5d2;
+}
+
+.id-card header .validity.invalid {
+  color: #ffd0d0;
+}
+
+.id-card-main {
+  display: grid;
+  grid-template-rows: 50% 1fr;
+  gap: 0;
+  position: relative;
+  flex: 1;
+}
+
+.photo-top {
+  position: relative;
+  background: linear-gradient(120deg, var(--primary-dark) 0%, var(--primary) 100%);
+  overflow: hidden;
+  height: 100%;
+  min-height: 120px;
+}
+
+.photo-top::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--gold) 0%, var(--gold-light) 50%, var(--gold) 100%);
+}
+
+.photo-top .photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 0;
+  background: #f4eff7;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.photo-top .photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.photo-top .photo span {
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 0.05em;
+}
+
+.photo-top .card-title-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: linear-gradient(90deg, rgba(61, 6, 80, 0.85) 0%, rgba(90, 12, 112, 0.4) 70%, transparent 100%);
+  color: #fff;
+  z-index: 2;
+}
+
+.photo-top .card-title-bar h1 {
+  font-size: 11px;
+  line-height: 1.2;
+  margin: 0;
+  font-weight: 700;
+}
+
+.photo-top .card-title-bar .info-role {
+  display: none;
+}
+
+.id-card-info {
+  width: 100%;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px 8px;
+}
+
+.id-card-info .info-left {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  text-align: left;
+}
+
+.id-card-info .info-field {
+  display: grid;
+  gap: 0;
+  min-width: 0;
+}
+
+.id-card-info .info-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #775c83;
+}
+
+.id-card-info .info-label i {
+  color: var(--primary);
+  font-size: 10px;
+}
+
+.id-card-info .info-value {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #271549;
+  overflow-wrap: anywhere;
+}
+
+.id-card-info .student-name {
+  font-size: 12px;
+  line-height: 1.25;
+  margin: 0;
+  font-weight: 700;
+  color: var(--primary-dark);
+  text-align: left;
+}
+
+.id-card-info dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 8px;
+  margin: 0;
+  padding: 6px 8px;
+  font-size: 10.5px;
+  align-items: center;
+  text-align: left;
+  background: #f7f3fa;
+  border-radius: 10px;
+}
+
+.id-card-info dt {
+  color: #775c83;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.id-card-info dt i {
+  color: var(--primary);
+  font-size: 13px;
+}
+
+.id-card-info dd {
+  margin: 0;
+  font-weight: 600;
+  color: #271549;
+  text-align: right;
+}
+
+.qr-block {
+  text-align: center;
+}
+
+.qr-block img {
+  width: 104px;
+  height: 104px;
+  border: 1px solid var(--primary);
+  border-radius: 8px;
+  padding: 3px;
+  background: #fff;
+}
+
+.qr-block small {
+  display: block;
+  margin-top: 4px;
+  font-size: 8.5px;
+  color: #775c83;
+  letter-spacing: 0.03em;
+}
+
+.id-card footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  text-align: center;
+  background: linear-gradient(120deg, var(--primary-dark) 0%, var(--primary) 100%);
+  color: #fff;
+  padding: 8px 12px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border-top: 2px solid rgba(212, 175, 55, 0.45);
+}
+
+.id-card footer .footer-code {
+  color: var(--gold-light);
+}
+
+.id-card footer i {
+  margin-right: 5px;
+}
+
+@media (max-width: 400px) {
+  .id-card {
+    width: min(100%, 320px);
+  }
+
+  .photo-top .photo span {
+    font-size: 40px;
+  }
+
+  .id-card-info {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .qr-block img {
+    width: 88px;
+    height: 88px;
+  }
+}
+
+/* ============================================
+   LOGIN
+   ============================================ */
+.login-shell {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  max-width: 900px;
+  margin: 2.5rem auto;
+  background: #fff;
+  border-radius: 22px;
+  overflow: hidden;
+  border: 1px solid rgba(90, 12, 112, 0.08);
+  box-shadow: 0 30px 70px -24px rgba(61, 6, 80, 0.42), 0 12px 30px -18px rgba(0, 0, 0, 0.22);
+  animation: login-rise .6s cubic-bezier(.2, .8, .2, 1) both;
+}
+
+.login-brand {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 3rem 2rem;
+  text-align: center;
+  color: #fff;
+  background: linear-gradient(150deg, var(--primary-dark) 0%, var(--primary) 55%, var(--primary-light) 100%);
+}
+
+.login-brand::after {
+  content: '';
+  position: absolute;
+  inset: 14px;
+  border: 1.5px solid rgba(212, 175, 55, 0.5);
+  border-radius: 16px;
+  pointer-events: none;
+}
+
+.login-brand .escudo {
+  width: 148px;
+  height: 148px;
+  object-fit: contain;
+  background: #fff;
+  border-radius: 50%;
+  padding: 10px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+}
+
+.login-brand h2 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.login-brand p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.login-form {
+  padding: 3rem 2.5rem;
+}
+
+.login-form .eyebrow {
+  margin-bottom: 0.4rem;
+}
+
+.login-form h1 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--primary-dark);
+  margin-bottom: 0.35rem;
+}
+
+.login-form p.lead-text {
+  color: #64748b;
+  font-size: 0.92rem;
+  margin-bottom: 1.75rem;
+}
+
+.login-form .input-icon {
+  position: relative;
+}
+
+.login-form .input-icon i {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--primary-light);
+  font-size: 1.1rem;
+  pointer-events: none;
+}
+
+.login-form .input-icon .form-control {
+  padding-left: 2.75rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-shell {
+    animation: none;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .login-shell {
+    grid-template-columns: 1fr;
+    margin: 1.25rem auto;
+  }
+
+  .login-brand {
+    padding: 2rem 1.5rem;
+  }
+
+  .login-brand .escudo {
+    width: 92px;
+    height: 92px;
+  }
+
+  .login-form {
+    padding: 2rem 1.5rem;
+  }
+}
+
+/* ============================================
+   PULIDO VISUAL + ICONOS MÁS GRANDES
+   ============================================ */
+body {
+  background:
+    radial-gradient(1100px 620px at 100% -8%, rgba(212, 175, 55, 0.12), transparent 58%),
+    radial-gradient(900px 520px at -10% 108%, rgba(90, 12, 112, 0.14), transparent 55%),
+    linear-gradient(135deg, #eef3fb 0%, #dde9f8 45%, #f4f7fc 100%);
+  background-attachment: fixed;
+}
+
+/* --- Iconos un poquito más grandes --- */
+.bi {
+  line-height: 1;
+  vertical-align: -0.14em;
+}
+
+.btn .bi,
+.nav-link .bi,
+.card-header .bi,
+.list-group-item .bi,
+.form-label .bi,
+.badge .bi,
+.status-badge .bi,
+.alert .bi {
+  font-size: 1.14em;
+}
+
+.navbar .nav-link .bi {
+  font-size: 1.22rem;
+  vertical-align: -0.18em;
+}
+
+.navbar-brand .bi {
+  font-size: 1.5rem;
+}
+
+.card-header h5 .bi,
+.section-card .card-header .bi {
+  font-size: 1.35rem;
+  color: var(--primary);
+}
+
+.form-label .bi {
+  color: var(--primary);
+}
+
+.table thead th .bi {
+  font-size: 1.12em;
+}
+
+.eyebrow .bi {
+  font-size: 1.15rem;
+}
+
+/* --- Navbar más elegante --- */
+.navbar {
+  background: linear-gradient(90deg, var(--primary-dark) 0%, var(--primary) 55%, var(--primary-light) 100%) !important;
+}
+
+.navbar-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: .15rem;
+}
+
+.navbar .nav-link {
+  display: inline-flex;
+  align-items: center;
+}
+
+.navbar .nav-link:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+/* --- Tarjetas y secciones --- */
+.card {
+  border: 1px solid rgba(90, 12, 112, 0.07);
+}
+
+.section-card .card-header,
+.form-card .card-header {
+  border-bottom: 1px solid rgba(90, 12, 112, 0.07);
+  background: linear-gradient(180deg, #ffffff 0%, #fbf8fd 100%);
+}
+
+.section-card .card-header {
+  border-left: 4px solid var(--primary);
+}
+
+.section-card .card-header h5 {
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+}
+
+/* --- Tabla más bonita --- */
+.table thead th {
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  font-size: 0.82rem;
+  padding: .85rem 0.7rem;
+}
+
+.table tbody tr {
+  transition: background-color .2s ease, box-shadow .2s ease;
+}
+
+.table tbody tr:hover {
+  box-shadow: inset 4px 0 0 var(--primary);
+}
+
+/* --- Botones --- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .15rem;
+  letter-spacing: .01em;
+}
+
+.btn:focus-visible,
+.nav-link:focus-visible,
+.form-control:focus-visible,
+.form-select:focus-visible {
+  outline: 3px solid rgba(90, 12, 112, 0.35);
+  outline-offset: 2px;
+}
+
+.btn-outline-secondary,
+.btn-outline-success,
+.btn-outline-danger {
+  border-width: 2px;
+}
+
+/* --- List group con deslizamiento --- */
+.list-group-item-action {
+  transition: all .2s ease;
+}
+
+.list-group-item-action:hover {
+  transform: translateX(3px);
+}
+
+/* --- Status badge --- */
+.status-badge {
+  padding: .34rem .85rem;
+  font-size: .78rem;
+}
+
+.status-badge::before {
+  width: 9px;
+  height: 9px;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+}
+
+/* --- Eyebrow --- */
+.eyebrow {
+  font-size: .8rem;
+}
+
+/* --- Barra superior pública --- */
+.public-top {
+  background: linear-gradient(120deg, var(--primary-dark) 0%, var(--primary) 55%, var(--primary-light) 100%);
+}
+
+.public-top img {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+/* --- Hero de bienvenida --- */
+.hero-card {
+  position: relative;
+  max-width: 720px;
+  margin: 1rem auto;
+  padding: 3rem clamp(1.5rem, 5vw, 3.5rem);
+  text-align: center;
+  background: #fff;
+  border-radius: 26px;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.hero-card::before {
+  content: '';
+  position: absolute;
+  inset: 12px;
+  border: 1.5px solid rgba(212, 175, 55, 0.35);
+  border-radius: 18px;
+  pointer-events: none;
+}
+
+.hero-card .hero-logo {
+  width: 108px;
+  height: 108px;
+  object-fit: contain;
+  margin: 0 auto 1rem;
+  background: #f7f3fa;
+  border-radius: 50%;
+  padding: 10px;
+  box-shadow: 0 12px 28px rgba(90, 12, 112, 0.18);
+}
+
+.hero-card h1 {
+  font-size: clamp(2.2rem, 6vw, 3.2rem);
+  font-weight: 800;
+  letter-spacing: .04em;
+  background: linear-gradient(120deg, var(--primary-dark) 0%, var(--primary) 55%, var(--primary-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: .4rem 0 .5rem;
+}
+
+.hero-card p {
+  color: #64748b;
+  max-width: 46ch;
+  margin: 0 auto 1.6rem;
+}
+
+.hero-card .hero-actions {
+  display: flex;
+  justify-content: center;
+  gap: .75rem;
+  flex-wrap: wrap;
+}
+
+.hero-card .btn {
+  padding: .8rem 1.8rem;
+  border-radius: 50rem;
+}
+
+/* --- Login: acentos --- */
+@keyframes login-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.login-form .input-icon .form-control:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 .28rem rgba(90, 12, 112, 0.15);
+}
+
+@media (max-width: 575.98px) {
+  .metric-card .metric-icon {
+    width: 48px;
+    height: 48px;
+    flex: 0 0 48px;
+    font-size: 1.4rem;
+  }
+
+  .metric-card h2 {
+    font-size: 1.7rem;
   }
 }
 

@@ -1,0 +1,22 @@
+# VirtualHost de ejemplo para Apache (XAMPP / Linux).
+# El DocumentRoot DEBE apuntar a la carpeta "public".
+# Requiere mod_rewrite activo y AllowOverride All para que funcione .htaccess.
+
+<VirtualHost *:80>
+    ServerName carnets.local
+    DocumentRoot "C:/xampp/htdocs/carnet_Esfap/public"
+
+    <Directory "C:/xampp/htdocs/carnet_Esfap/public">
+        Options -Indexes +FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    ErrorLog  "logs/carnet_esfap-error.log"
+    CustomLog "logs/carnet_esfap-access.log" combined
+</VirtualHost>
+
+# En Linux, reemplaza el DocumentRoot por, por ejemplo:
+#   DocumentRoot /var/www/carnet_Esfap/public
+# Y habilita el módulo:
+#   sudo a2enmod rewrite && sudo systemctl restart apache2
