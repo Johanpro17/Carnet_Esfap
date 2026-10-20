@@ -39,10 +39,6 @@ $apellidos = trim(($carnet['apellido_paterno'] ?? '') . ' ' . ($carnet['apellido
                     <span class="info-value"><?= e($apellidos !== '' ? $apellidos : '-') ?></span>
                 </div>
                 <div class="info-field">
-                    <span class="info-label"><i class="bi bi-person-vcard"></i>DNI</span>
-                    <span class="info-value"><?= e($carnet['dni'] ?? '-') ?></span>
-                </div>
-                <div class="info-field">
                     <span class="info-label"><i class="bi bi-mortarboard-fill"></i>Carrera</span>
                     <span class="info-value"><?= e($carnet['carrera_nombre'] ?? '-') ?></span>
                 </div>

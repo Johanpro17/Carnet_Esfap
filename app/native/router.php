@@ -99,7 +99,7 @@ function require_student_access(int $studentId): array
 function validate_student_data(array $input, ?int $studentId, bool $creating, bool $partial = false): array
 {
     $data = [];
-    foreach (['codigo_alumno', 'dni', 'nombres', 'apellido_paterno', 'apellido_materno', 'carrera_id', 'estado', 'fecha_nacimiento', 'sexo', 'telefono', 'correo', 'direccion', 'periodo', 'semestre', 'fecha_vigencia'] as $key) {
+    foreach (['codigo_alumno', 'nombres', 'apellido_paterno', 'apellido_materno', 'carrera_id', 'estado', 'fecha_nacimiento', 'sexo', 'correo', 'periodo', 'semestre', 'fecha_vigencia'] as $key) {
         $data[$key] = trim((string) ($input[$key] ?? ''));
     }
 
@@ -109,17 +109,11 @@ function validate_student_data(array $input, ?int $studentId, bool $creating, bo
             $errors[] = 'El codigo de alumno es obligatorio y debe tener como maximo 30 caracteres.';
         }
     }
-    if (!preg_match('/^\d{8}$/', $data['dni'])) {
-        $errors[] = 'El DNI debe tener 8 digitos.';
-    }
     if (($creating || array_key_exists('nombres', $input)) && ($data['nombres'] === '' || strlen($data['nombres']) > 80)) {
         $errors[] = 'Los nombres son obligatorios y deben tener como maximo 80 caracteres.';
     }
     if (($creating || array_key_exists('apellido_paterno', $input)) && ($data['apellido_paterno'] === '' || strlen($data['apellido_paterno']) > 60)) {
         $errors[] = 'El apellido paterno es obligatorio y debe tener como maximo 60 caracteres.';
-    }
-    if ($data['telefono'] !== '' && !preg_match('/^\d{9}$/', $data['telefono'])) {
-        $errors[] = 'El telefono debe tener 9 digitos.';
     }
     if ($data['correo'] !== '' && (!filter_var($data['correo'], FILTER_VALIDATE_EMAIL) || strlen($data['correo']) > 150)) {
         $errors[] = 'El correo no es valido.';
@@ -146,9 +140,9 @@ function validate_student_data(array $input, ?int $studentId, bool $creating, bo
         $errors[] = 'Completa un periodo, semestre y fecha de vigencia validos.';
     }
 
-    $uniqueFields = ['dni' => 'DNI', 'codigo_alumno' => 'codigo de alumno', 'correo' => 'correo'];
+    $uniqueFields = ['codigo_alumno' => 'codigo de alumno', 'correo' => 'correo'];
     foreach ($uniqueFields as $field => $label) {
-        if (($partial && $field !== 'dni') || $data[$field] === '') {
+        if (($partial) || $data[$field] === '') {
             continue;
         }
         $sql = "SELECT alumno_id FROM alumnos WHERE {$field} = ?";
@@ -347,7 +341,7 @@ function route_request(): void
     }
 
     if ($method === 'GET' && $path === '/') {
-        render_page('welcome');
+        redirect_to(current_user() ? 'dashboard' : 'login');
     }
 
     if ($path === '/login' && $method === 'GET') {
@@ -449,8 +443,8 @@ function route_request(): void
         $conditions = ['a.deleted_at IS NULL'];
         $params = [];
         if ($search !== '') {
-            $conditions[] = '(a.nombres LIKE ? OR a.apellido_paterno LIKE ? OR a.apellido_materno LIKE ? OR a.dni LIKE ? OR a.codigo_alumno LIKE ?)';
-            array_push($params, ...array_fill(0, 5, '%' . $search . '%'));
+            $conditions[] = '(a.nombres LIKE ? OR a.apellido_paterno LIKE ? OR a.apellido_materno LIKE ? OR a.codigo_alumno LIKE ?)';
+            array_push($params, ...array_fill(0, 4, '%' . $search . '%'));
         }
         if ($careerId !== '' && ctype_digit($careerId)) {
             $conditions[] = 'a.carrera_id = ?';
@@ -493,18 +487,15 @@ function route_request(): void
             $data = validate_student_data($_POST, null, true);
             $photo = save_photo($_FILES['foto'] ?? null, $data['codigo_alumno'], required: true);
             db()->beginTransaction();
-            execute_sql('INSERT INTO alumnos (carrera_id, codigo_alumno, dni, nombres, apellido_paterno, apellido_materno, fecha_nacimiento, sexo, telefono, correo, direccion, foto, estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+            execute_sql('INSERT INTO alumnos (carrera_id, codigo_alumno, nombres, apellido_paterno, apellido_materno, fecha_nacimiento, sexo, correo, foto, estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
                 (int) $data['carrera_id'],
                 $data['codigo_alumno'],
-                $data['dni'],
                 $data['nombres'],
                 $data['apellido_paterno'],
                 $data['apellido_materno'],
                 $data['fecha_nacimiento'],
                 $data['sexo'] ?: null,
-                $data['telefono'] ?: null,
                 $data['correo'] ?: null,
-                $data['direccion'] ?: null,
                 $photo,
                 $data['estado'],
             ]);
@@ -564,7 +555,7 @@ function route_request(): void
             $pageByState[$state] = $page;
             $pagesByState[$state] = $pages;
             $studentsByState[$state] = query_all(
-                'SELECT a.alumno_id, a.nombres, a.apellido_paterno, a.apellido_materno, a.codigo_alumno, a.dni, a.estado, c.nombre AS carrera_nombre
+                'SELECT a.alumno_id, a.nombres, a.apellido_paterno, a.apellido_materno, a.codigo_alumno, a.correo, a.estado, c.nombre AS carrera_nombre
                  FROM alumnos a LEFT JOIN carreras c ON c.carrera_id = a.carrera_id
                  WHERE a.deleted_at IS NULL AND a.estado = ?
                  ORDER BY a.apellido_paterno, a.apellido_materno, a.nombres
@@ -611,26 +602,23 @@ function route_request(): void
             try {
                 if (!is_admin($user)) {
                     $data = validate_student_data($_POST, $studentId, false, partial: true);
-                    execute_sql('UPDATE alumnos SET dni = ?, telefono = ? WHERE alumno_id = ?', [$data['dni'], $data['telefono'] ?: null, $studentId]);
-                    audit('EDITAR_ALUMNO', 'alumnos', $studentId, 'Actualizacion de DNI y telefono por el alumno');
+                    execute_sql('UPDATE alumnos SET correo = ? WHERE alumno_id = ?', [$data['correo'] ?: null, $studentId]);
+                    audit('EDITAR_ALUMNO', 'alumnos', $studentId, 'Actualizacion de datos por el alumno');
                     flash('status', 'Tus datos fueron actualizados correctamente.');
                     redirect_to('alumnos/' . $studentId . '/carnet');
                 }
                 $data = validate_student_data($_POST, $studentId, false);
                 $photo = save_photo($_FILES['foto'] ?? null, $data['codigo_alumno'], $student['foto']);
                 try {
-                    execute_sql('UPDATE alumnos SET carrera_id = ?, codigo_alumno = ?, dni = ?, nombres = ?, apellido_paterno = ?, apellido_materno = ?, fecha_nacimiento = ?, sexo = ?, telefono = ?, correo = ?, direccion = ?, foto = ?, estado = ? WHERE alumno_id = ?', [
+                    execute_sql('UPDATE alumnos SET carrera_id = ?, codigo_alumno = ?, nombres = ?, apellido_paterno = ?, apellido_materno = ?, fecha_nacimiento = ?, sexo = ?, correo = ?, foto = ?, estado = ? WHERE alumno_id = ?', [
                         (int) $data['carrera_id'],
                         $data['codigo_alumno'],
-                        $data['dni'],
                         $data['nombres'],
                         $data['apellido_paterno'],
                         $data['apellido_materno'],
                         $data['fecha_nacimiento'] ?: null,
                         $data['sexo'] ?: null,
-                        $data['telefono'] ?: null,
                         $data['correo'] ?: null,
-                        $data['direccion'] ?: null,
                         $photo,
                         $data['estado'],
                         $studentId,

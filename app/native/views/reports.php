@@ -143,7 +143,7 @@ ob_start();
                         <th>#</th>
                         <th><i class="bi bi-person me-1"></i>Nombre completo</th>
                         <th><i class="bi bi-hash me-1"></i>Código</th>
-                        <th><i class="bi bi-person-vcard me-1"></i>DNI</th>
+                        <th><i class="bi bi-envelope me-1"></i>Correo</th>
                         <th><i class="bi bi-mortarboard me-1"></i>Carrera</th>
                         <th class="text-center">Acción</th>
                     </tr>
@@ -155,7 +155,7 @@ ob_start();
                                 <td><?= e($index + 1) ?></td>
                                 <td><?= e(student_full_name($student)) ?></td>
                                 <td><?= e($student['codigo_alumno']) ?></td>
-                                <td><?= e($student['dni']) ?></td>
+                                <td><?= e($student['correo'] ?: '-') ?></td>
                                 <td><?= e($student['carrera_nombre'] ?? '-') ?></td>
                                 <td class="text-center"><a class="btn btn-sm btn-outline-primary" href="<?= e(app_url('alumnos/' . (int) $student['alumno_id'] . '/carnet')) ?>"><i class="bi bi-person-vcard me-1"></i>Ver carnet</a></td>
                             </tr><?php endforeach;
