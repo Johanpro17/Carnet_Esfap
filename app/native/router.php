@@ -209,6 +209,21 @@ function delete_photo(?string $filename): void
     }
 }
 
+function server_lan_ip(): string
+{
+    $ip = $_SERVER['SERVER_ADDR'] ?? '';
+    if ($ip !== '' && $ip !== '127.0.0.1' && $ip !== '::1') {
+        return $ip;
+    }
+
+    $detected = @gethostbyname(gethostname());
+    if ($detected !== '' && $detected !== '127.0.0.1' && filter_var($detected, FILTER_VALIDATE_IP)) {
+        return $detected;
+    }
+
+    return '';
+}
+
 function qr_base_url(): string
 {
     $configured = trim(app_setting('QR_BASE_URL'));
@@ -217,6 +232,14 @@ function qr_base_url(): string
     }
 
     $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $name = strtolower(explode(':', $host)[0]);
+    if ($name === 'localhost' || $name === '127.0.0.1' || $name === '::1') {
+        $lan = server_lan_ip();
+        if ($lan !== '') {
+            $host = $lan;
+        }
+    }
+
     return 'http://' . $host . rtrim(app_url(), '/');
 }
 
