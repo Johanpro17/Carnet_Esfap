@@ -94,17 +94,26 @@ function validate_student_data(array $input, ?int $studentId, bool $creating, bo
 
     $errors = [];
     if ($creating || array_key_exists('codigo_alumno', $input)) {
-        if ($data['codigo_alumno'] === '' || strlen($data['codigo_alumno']) > 30) {
+        if ($data['codigo_alumno'] === '' || mb_strlen($data['codigo_alumno']) > 30) {
             $errors[] = 'El codigo de alumno es obligatorio y debe tener como maximo 30 caracteres.';
         }
     }
-    if (($creating || array_key_exists('nombres', $input)) && ($data['nombres'] === '' || strlen($data['nombres']) > 80)) {
+    if (($creating || array_key_exists('nombres', $input)) && ($data['nombres'] === '' || mb_strlen($data['nombres']) > 80)) {
         $errors[] = 'Los nombres son obligatorios y deben tener como maximo 80 caracteres.';
     }
-    if (($creating || array_key_exists('apellido_paterno', $input)) && ($data['apellido_paterno'] === '' || strlen($data['apellido_paterno']) > 60)) {
+    if (($creating || array_key_exists('nombres', $input)) && $data['nombres'] !== '' && !preg_match('/^[\p{L}\p{M}\s\'\.\-]+$/u', $data['nombres'])) {
+        $errors[] = 'Los nombres solo pueden contener letras (incluidas tildes y la letra ene), espacios, apostrofes, puntos y guiones.';
+    }
+    if (($creating || array_key_exists('apellido_paterno', $input)) && ($data['apellido_paterno'] === '' || mb_strlen($data['apellido_paterno']) > 60)) {
         $errors[] = 'El apellido paterno es obligatorio y debe tener como maximo 60 caracteres.';
     }
-    if ($data['correo'] !== '' && (!filter_var($data['correo'], FILTER_VALIDATE_EMAIL) || strlen($data['correo']) > 150)) {
+    if (($creating || array_key_exists('apellido_materno', $input)) && $data['apellido_materno'] !== '' && !preg_match('/^[\p{L}\p{M}\s\'\.\-]+$/u', $data['apellido_materno'])) {
+        $errors[] = 'El apellido materno solo puede contener letras (incluidas tildes y la letra ene), espacios, apostrofes, puntos y guiones.';
+    }
+    if (($creating || array_key_exists('apellido_paterno', $input)) && $data['apellido_paterno'] !== '' && !preg_match('/^[\p{L}\p{M}\s\'\.\-]+$/u', $data['apellido_paterno'])) {
+        $errors[] = 'El apellido paterno solo puede contener letras (incluidas tildes y la letra ene), espacios, apostrofes, puntos y guiones.';
+    }
+    if ($data['correo'] !== '' && (!filter_var($data['correo'], FILTER_VALIDATE_EMAIL) || $data['correo'] !== '' && mb_strlen($data['correo']) > 150)) {
         $errors[] = 'El correo no es valido.';
     }
     if (!$partial && ($creating || array_key_exists('carrera_id', $input))) {
