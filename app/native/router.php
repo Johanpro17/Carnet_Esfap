@@ -216,10 +216,8 @@ function qr_base_url(): string
         return rtrim($configured, '/');
     }
 
-    $https = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
-    $scheme = $https ? 'https' : 'http';
     $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-    return $scheme . '://' . $host . rtrim(app_url(), '/');
+    return 'http://' . $host . rtrim(app_url(), '/');
 }
 
 function output_qr(string $token): void
