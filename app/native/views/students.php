@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 $title = 'Lista de alumnos';
 $students = $students ?? [];
 $careers = $careers ?? [];
@@ -21,7 +21,7 @@ ob_start();
 <div class="page-heading mb-4 flex-wrap">
     <div><span class="eyebrow">Estudiantes</span>
         <h1>Lista de alumnos</h1>
-        <p>GestiÃ³n de estudiantes, carnets y estados acadÃ©micos.</p>
+        <p>Gestión de estudiantes, carnets y estados académicos.</p>
     </div><a href="<?= e(app_url('alumnos/crear')) ?>" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Nuevo carnet</a>
 </div>
 <form method="get" action="<?= e(app_url('alumnos')) ?>" class="row g-2 mb-3">
@@ -35,14 +35,14 @@ ob_start();
     <div class="col-md-2"><button class="btn btn-primary w-100" type="submit"><i class="bi bi-search me-1"></i>Buscar</button></div>
     <?php if ($expiring): ?><input type="hidden" name="proximos" value="1"><?php endif; ?>
 </form>
-<div class="d-flex gap-2 mb-3"><a class="btn btn-sm <?= $expiring ? 'btn-warning' : 'btn-outline-warning' ?>" href="<?= e($expiringUrl) ?>"><i class="bi bi-clock-history me-1"></i>Por vencer en 30 dÃ­as</a><a class="btn btn-sm btn-outline-secondary" href="<?= e(app_url('alumnos')) ?>"><i class="bi bi-x-circle me-1"></i>Limpiar filtros</a></div>
+<div class="d-flex gap-2 mb-3"><a class="btn btn-sm <?= $expiring ? 'btn-warning' : 'btn-outline-warning' ?>" href="<?= e($expiringUrl) ?>"><i class="bi bi-clock-history me-1"></i>Por vencer en 30 días</a><a class="btn btn-sm btn-outline-secondary" href="<?= e(app_url('alumnos')) ?>"><i class="bi bi-x-circle me-1"></i>Limpiar filtros</a></div>
 <div class="card section-card">
     <div class="table-responsive">
         <table class="table table-striped table-hover align-middle mb-0">
             <thead>
                 <tr>
                     <th><i class="bi bi-person me-1"></i>Nombre</th>
-                    <th><i class="bi bi-hash me-1"></i>CÃ³digo</th>
+                    <th><i class="bi bi-hash me-1"></i>Código</th>
                     <th><i class="bi bi-envelope me-1"></i>Correo</th>
                     <th><i class="bi bi-mortarboard me-1"></i>Carrera</th>
                     <th><i class="bi bi-activity me-1"></i>Estado</th>
@@ -57,7 +57,7 @@ ob_start();
                         <td><?= e($student['carrera_nombre'] ?? '-') ?></td>
                         <td><span class="status-badge <?= e(strtolower($student['estado'])) ?>"><?= e($student['estado']) ?></span></td>
                         <td>
-                            <div class="btn-group btn-group-sm"><a class="btn btn-outline-primary" title="Ver carnet" href="<?= e(app_url('alumnos/' . (int) $student['alumno_id'] . '/carnet')) ?>"><i class="bi bi-person-vcard me-1"></i>Carnet</a><a class="btn btn-outline-secondary" title="Editar" href="<?= e(app_url('alumnos/' . (int) $student['alumno_id'] . '/editar')) ?>"><i class="bi bi-pencil-square me-1"></i>Editar</a><?php if (!empty($student['token_qr'])): ?><a class="btn btn-outline-success" title="Imprimir o guardar PDF" target="_blank" href="<?= e(app_url('verificar/' . rawurlencode($student['token_qr']) . '/pdf')) ?>"><i class="bi bi-printer me-1"></i>Imprimir</a><?php endif; ?><form method="post" action="<?= e(app_url('alumnos/' . (int) $student['alumno_id'])) ?>" onsubmit="return confirm('Â¿Eliminar este alumno?')"><?= csrf_field() ?><input type="hidden" name="_method" value="DELETE"><button class="btn btn-outline-danger" type="submit"><i class="bi bi-trash me-1"></i>Eliminar</button></form>
+                            <div class="btn-group btn-group-sm"><a class="btn btn-outline-primary" title="Ver carnet" href="<?= e(app_url('alumnos/' . (int) $student['alumno_id'] . '/carnet')) ?>"><i class="bi bi-person-vcard me-1"></i>Carnet</a><a class="btn btn-outline-secondary" title="Editar" href="<?= e(app_url('alumnos/' . (int) $student['alumno_id'] . '/editar')) ?>"><i class="bi bi-pencil-square me-1"></i>Editar</a><?php if (!empty($student['token_qr'])): ?><a class="btn btn-outline-success" title="Imprimir o guardar PDF" target="_blank" href="<?= e(app_url('verificar/' . rawurlencode($student['token_qr']) . '/pdf')) ?>"><i class="bi bi-printer me-1"></i>Imprimir</a><?php endif; ?><form method="post" action="<?= e(app_url('alumnos/' . (int) $student['alumno_id'])) ?>" onsubmit="return confirm('¿Eliminar este alumno?')"><?= csrf_field() ?><input type="hidden" name="_method" value="DELETE"><button class="btn btn-outline-danger" type="submit"><i class="bi bi-trash me-1"></i>Eliminar</button></form>
                             </div>
                         </td>
                     </tr><?php endforeach; ?>
@@ -68,7 +68,7 @@ ob_start();
         </table>
     </div>
 </div>
-<div class="d-flex justify-content-between align-items-center mt-3"><span class="text-muted"><?= e($total) ?> alumno(s) Â· pÃ¡gina <?= e($page) ?> de <?= e($pages) ?></span>
+<div class="d-flex justify-content-between align-items-center mt-3"><span class="text-muted"><?= e($total) ?> alumno(s) · página <?= e($page) ?> de <?= e($pages) ?></span>
     <div class="btn-group"><a class="btn btn-outline-secondary <?= $page <= 1 ? 'disabled' : '' ?>" href="<?= e($pageUrl(max(1, $page - 1))) ?>"><i class="bi bi-chevron-left me-1"></i>Anterior</a><a class="btn btn-outline-secondary <?= $page >= $pages ? 'disabled' : '' ?>" href="<?= e($pageUrl(min($pages, $page + 1))) ?>">Siguiente<i class="bi bi-chevron-right ms-1"></i></a></div>
 </div>
 <?php
