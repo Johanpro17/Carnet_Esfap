@@ -34,6 +34,7 @@ ob_start();
     }
 </style>
 <div class="text-center mb-3">
+    <div class="alert alert-primary d-inline-block mb-2"><i class="bi bi-person-check-fill me-1"></i><strong>REGISTRADO EN EL SISTEMA</strong><br><small>El carnet escaneado pertenece a un estudiante registrado en la ESFAP.</small></div>
     <div class="alert <?= $valid ? 'alert-success' : 'alert-danger' ?> d-inline-block mb-2"><i class="bi <?= $valid ? 'bi-patch-check-fill' : 'bi-x-octagon-fill' ?> me-1"></i><strong><?= $valid ? 'CARNET VÁLIDO' : 'CARNET NO VIGENTE' ?></strong><br><small><?= $vigency ? 'Vigencia hasta ' . e(date('d/m/Y', strtotime($vigency))) : 'Sin fecha de vigencia registrada' ?></small></div>
     <?php if (!$printOnly): ?><div class="small text-muted">Registro oficial verificado por el sistema institucional.</div><?php endif; ?>
 </div>

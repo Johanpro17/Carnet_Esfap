@@ -378,7 +378,7 @@ function route_request(): void
         $carnet = carnet_by_token($match[1]);
         if (!$carnet) {
             http_response_code(404);
-            render_page('error', ['code' => 404, 'message' => 'Carnet no encontrado. Verifica el codigo escaneado.']);
+            render_page('verify-not-found', ['token' => strtolower($match[1])]);
         }
         audit('VERIFICAR_CARNET', 'carnets', (int) $carnet['carnet_id'], 'Verificacion publica');
         render_page('verify-card', ['carnet' => $carnet, 'printOnly' => false]);
@@ -388,7 +388,7 @@ function route_request(): void
         $carnet = carnet_by_token($match[1]);
         if (!$carnet) {
             http_response_code(404);
-            render_page('error', ['code' => 404, 'message' => 'Carnet no encontrado.']);
+            render_page('verify-not-found', ['token' => strtolower($match[1])]);
         }
         audit('IMPRIMIR_CARNET', 'carnets', (int) $carnet['carnet_id'], 'Impresion / guardar como PDF');
         render_page('verify-card', ['carnet' => $carnet, 'printOnly' => true]);
