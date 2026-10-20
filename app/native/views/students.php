@@ -43,7 +43,7 @@ ob_start();
                 <tr>
                     <th><i class="bi bi-person me-1"></i>Nombre</th>
                     <th><i class="bi bi-hash me-1"></i>Código</th>
-                    <th><i class="bi bi-person-vcard me-1"></i>DNI</th>
+                    <th><i class="bi bi-envelope me-1"></i>Correo</th>
                     <th><i class="bi bi-mortarboard me-1"></i>Carrera</th>
                     <th><i class="bi bi-activity me-1"></i>Estado</th>
                     <th><i class="bi bi-gear me-1"></i>Acciones</th>
@@ -53,7 +53,7 @@ ob_start();
                 <?php foreach ($students as $student): ?><tr>
                         <td><?= e(student_full_name($student)) ?></td>
                         <td><?= e($student['codigo_alumno']) ?></td>
-                        <td><?= e($student['dni']) ?></td>
+                        <td><?= e($student['correo'] ?: '-') ?></td>
                         <td><?= e($student['carrera_nombre'] ?? '-') ?></td>
                         <td><span class="status-badge <?= e(strtolower($student['estado'])) ?>"><?= e($student['estado']) ?></span></td>
                         <td>

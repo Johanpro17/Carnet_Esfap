@@ -242,20 +242,34 @@ function output_qr(string $token): void
 
 function authenticate(string $password): ?array
 {
-    $admin = query_one("SELECT * FROM usuarios WHERE username = 'admin' AND estado = 'ACTIVO' LIMIT 1");
+    $admin = query_one(
+        "SELECT u.user_id, u.alumno_id, u.password, u.estado,
+                r.nombre AS role,
+                p.nombres,
+                TRIM(CONCAT_WS(' ', p.apellido_paterno, p.apellido_materno)) AS apellidos,
+                p.correo
+         FROM usuarios u
+         JOIN roles_usuario ru ON ru.user_id = u.user_id
+         JOIN roles r ON r.rol_id = ru.rol_id
+         LEFT JOIN usuario_personal up ON up.user_id = u.user_id
+         LEFT JOIN personal p ON p.personal_id = up.personal_id
+         WHERE u.alumno_id IS NULL AND u.estado = 'ACTIVO' AND r.nombre = 'ADMIN' AND r.estado = 1
+         LIMIT 1"
+    );
     if ($admin && password_verify($password, $admin['password'])) {
-        $role = query_one(
-            "SELECT r.nombre FROM roles_usuario ru JOIN roles r ON r.rol_id = ru.rol_id WHERE ru.user_id = ? AND r.nombre = 'ADMIN' AND r.estado = 1 LIMIT 1",
-            [$admin['user_id']]
-        );
-        if ($role) {
-            $admin['role'] = $role['nombre'];
-            return $admin;
-        }
+        return $admin;
     }
 
     $student = query_one(
-        "SELECT u.*, 'ALUMNO' AS role FROM usuarios u WHERE LOWER(u.username) = LOWER(?) AND u.alumno_id IS NOT NULL AND u.estado = 'ACTIVO' LIMIT 1",
+        "SELECT u.user_id, u.alumno_id, u.password, u.estado,
+                'ALUMNO' AS role,
+                a.nombres,
+                TRIM(CONCAT_WS(' ', a.apellido_paterno, a.apellido_materno)) AS apellidos,
+                a.correo
+         FROM usuarios u
+         JOIN alumnos a ON a.alumno_id = u.alumno_id
+         WHERE LOWER(a.correo) = LOWER(?) AND u.alumno_id IS NOT NULL AND u.estado = 'ACTIVO'
+         LIMIT 1",
         [$password]
     );
     return $student ?: null;
@@ -267,9 +281,9 @@ function login_user(array $user): void
     $_SESSION['user'] = [
         'user_id' => (int) $user['user_id'],
         'alumno_id' => isset($user['alumno_id']) ? (int) $user['alumno_id'] : null,
-        'username' => $user['username'],
         'nombres' => $user['nombres'] ?? '',
         'apellidos' => $user['apellidos'] ?? '',
+        'correo' => $user['correo'] ?? '',
         'role' => $user['role'] ?? 'ALUMNO',
     ];
     execute_sql('UPDATE usuarios SET ultimo_login = NOW() WHERE user_id = ?', [(int) $user['user_id']]);

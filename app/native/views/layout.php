@@ -2,7 +2,7 @@
 $user = current_user();
 $statusMessage = flash('status');
 $errorMessage = flash('error');
-$displayName = trim(($user['nombres'] ?? '') . ' ' . ($user['apellidos'] ?? '')) ?: ($user['username'] ?? '');
+$displayName = trim(($user['nombres'] ?? '') . ' ' . ($user['apellidos'] ?? '')) ?: ($user['correo'] ?? 'Usuario');
 ?>
 <!doctype html>
 <html lang="es">
