@@ -85,17 +85,6 @@ function carnet_by_token(string $token): ?array
     );
 }
 
-function require_student_access(int $studentId): array
-{
-    $user = require_login();
-    if (!is_admin($user) && (int) ($user['alumno_id'] ?? 0) !== $studentId) {
-        http_response_code(403);
-        exit('Acceso restringido.');
-    }
-
-    return $user;
-}
-
 function validate_student_data(array $input, ?int $studentId, bool $creating, bool $partial = false): array
 {
     $data = [];
@@ -254,19 +243,7 @@ function authenticate(string $password): ?array
         return $admin;
     }
 
-    $student = query_one(
-        "SELECT u.user_id, u.alumno_id, u.password, u.estado,
-                'ALUMNO' AS role,
-                a.nombres,
-                TRIM(CONCAT_WS(' ', a.apellido_paterno, a.apellido_materno)) AS apellidos,
-                a.correo
-         FROM usuarios u
-         JOIN alumnos a ON a.alumno_id = u.alumno_id
-         WHERE LOWER(a.correo) = LOWER(?) AND u.alumno_id IS NOT NULL AND u.estado = 'ACTIVO'
-         LIMIT 1",
-        [$password]
-    );
-    return $student ?: null;
+    return null;
 }
 
 function login_user(array $user): void
@@ -354,12 +331,12 @@ function route_request(): void
     if ($path === '/login' && $method === 'POST') {
         verify_csrf();
         $user = authenticate(trim((string) ($_POST['password'] ?? '')));
-        if (!$user || ($user['role'] ?? '') === 'PERSONAL') {
-            flash('error', 'La contrasena no corresponde a ningun usuario activo.');
+        if (!$user) {
+            flash('error', 'La contrasena no corresponde al administrador.');
             redirect_to('login');
         }
         login_user($user);
-        redirect_to(($user['role'] ?? '') === 'ADMIN' ? 'dashboard' : 'alumnos/' . (int) $user['alumno_id'] . '/carnet');
+        redirect_to('dashboard');
     }
 
     if ($path === '/logout' && $method === 'POST') {
@@ -409,14 +386,7 @@ function route_request(): void
     }
 
     if ($method === 'GET' && $path === '/dashboard') {
-        $user = require_login();
-        if (!is_admin($user)) {
-            if (!empty($user['alumno_id'])) {
-                redirect_to('alumnos/' . (int) $user['alumno_id'] . '/carnet');
-            }
-            http_response_code(403);
-            render_page('error', ['code' => 403, 'message' => 'Acceso restringido.']);
-        }
+        $user = require_admin();
 
         $today = date('Y-m-d');
         $until = date('Y-m-d', strtotime('+30 days'));
@@ -521,14 +491,7 @@ function route_request(): void
     }
 
     if ($method === 'GET' && $path === '/reportes') {
-        $user = require_login();
-        if (!is_admin($user)) {
-            if (!empty($user['alumno_id'])) {
-                redirect_to('alumnos/' . (int) $user['alumno_id'] . '/carnet');
-            }
-            http_response_code(403);
-            render_page('error', ['code' => 403, 'message' => 'Acceso restringido.']);
-        }
+        $user = require_admin();
 
         $stateFilter = strtoupper(trim((string) ($_GET['estado'] ?? '')));
         if (!in_array($stateFilter, ALUMNO_ESTADOS, true)) {
@@ -585,28 +548,23 @@ function route_request(): void
         }
 
         if ($method === 'GET' && $action === 'carnet') {
-            $user = require_student_access($studentId);
+            $user = require_admin();
             $carnet = student_carnet($studentId);
             render_page('student-card', compact('user', 'student', 'carnet'));
         }
 
         if ($method === 'GET' && $action === 'editar') {
-            $user = require_student_access($studentId);
-            $careers = is_admin($user) ? query_all('SELECT carrera_id, nombre FROM carreras WHERE estado = 1 ORDER BY nombre') : [];
+            require_admin();
+            $user = current_user();
+            $careers = query_all('SELECT carrera_id, nombre FROM carreras WHERE estado = 1 ORDER BY nombre');
             render_page('student-form', compact('user', 'student', 'careers'));
         }
 
         if (($method === 'POST' || $method === 'PUT') && $action === '' && ($_POST['_method'] ?? '') !== 'DELETE') {
-            $user = require_student_access($studentId);
+            require_admin();
+            $user = current_user();
             verify_csrf();
             try {
-                if (!is_admin($user)) {
-                    $data = validate_student_data($_POST, $studentId, false, partial: true);
-                    execute_sql('UPDATE alumnos SET correo = ? WHERE alumno_id = ?', [$data['correo'] ?: null, $studentId]);
-                    audit('EDITAR_ALUMNO', 'alumnos', $studentId, 'Actualizacion de datos por el alumno');
-                    flash('status', 'Tus datos fueron actualizados correctamente.');
-                    redirect_to('alumnos/' . $studentId . '/carnet');
-                }
                 $data = validate_student_data($_POST, $studentId, false);
                 $photo = save_photo($_FILES['foto'] ?? null, $data['codigo_alumno'], $student['foto']);
                 try {

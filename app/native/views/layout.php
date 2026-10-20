@@ -28,9 +28,6 @@ $displayName = trim(($user['nombres'] ?? '') . ' ' . ($user['apellidos'] ?? ''))
                         <li class="nav-item"><a class="nav-link" href="<?= e(app_url('alumnos')) ?>"><i class="bi bi-people-fill me-1"></i>Alumnos</a></li>
                         <li class="nav-item"><a class="nav-link" href="<?= e(app_url('alumnos/crear')) ?>"><i class="bi bi-plus-circle me-1"></i>Crear carnet</a></li>
                         <li class="nav-item"><a class="nav-link" href="<?= e(app_url('reportes')) ?>"><i class="bi bi-bar-chart-line me-1"></i>Reportes</a></li>
-                    <?php elseif (!empty($user['alumno_id'])): ?>
-                        <li class="nav-item"><a class="nav-link" href="<?= e(app_url('alumnos/' . (int) $user['alumno_id'] . '/carnet')) ?>"><i class="bi bi-person-vcard me-1"></i>Mi carnet</a></li>
-                        <li class="nav-item"><a class="nav-link" href="<?= e(app_url('alumnos/' . (int) $user['alumno_id'] . '/editar')) ?>"><i class="bi bi-person-lines-fill me-1"></i>Mis datos</a></li>
                     <?php endif; ?>
                     <li class="nav-item"><a class="nav-link" href="<?= e(app_url('verificar')) ?>"><i class="bi bi-qr-code-scan me-1"></i>Verificar QR</a></li>
                     <li class="nav-item"><span class="nav-link"><i class="bi bi-person-circle me-1"></i><?= e($displayName) ?></span></li>
