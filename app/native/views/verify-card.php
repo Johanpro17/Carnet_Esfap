@@ -39,7 +39,7 @@ ob_start();
     <div class="alert <?= $valid ? 'alert-success' : 'alert-danger' ?> d-inline-block mb-2"><i class="bi <?= $valid ? 'bi-patch-check-fill' : 'bi-x-octagon-fill' ?> me-1"></i><strong><?= $valid ? 'CARNET VÁLIDO' : 'CARNET NO VIGENTE' ?></strong><br><small><?= $vigency ? 'Vigencia hasta ' . e(date('d/m/Y', strtotime($vigency))) : 'Sin fecha de vigencia registrada' ?></small></div>
     <?php if (!$printOnly): ?><div class="small text-muted">Registro oficial verificado por el sistema institucional.</div><?php endif; ?>
 </div>
-<?php if (!$printOnly): ?><div class="print-actions d-flex justify-content-center gap-2 mt-4"><a class="btn btn-primary" target="_blank" href="<?= e(app_url('verificar/' . rawurlencode($carnet['token_qr']) . '/pdf')) ?>"><i class="bi bi-filetype-pdf me-1"></i>Descargar PDF</a><a class="btn btn-outline-secondary" href="<?= e(app_url('verificar')) ?>"><i class="bi bi-arrow-left me-1"></i>Verificar otro carnet</a></div><?php else: ?><div class="print-actions text-center mt-3"><button class="btn btn-primary" type="button" onclick="window.print()"><i class="bi bi-filetype-pdf me-1"></i>Guardar como PDF</button></div>
+<?php if (!$printOnly): ?><div class="print-actions d-flex justify-content-center gap-2 mt-4"><a class="btn btn-primary" target="_blank" href="<?= e(app_url('verificar/' . rawurlencode($carnet['token_qr']) . '/pdf')) ?>"><i class="bi bi-filetype-pdf me-1"></i>Descargar PDF</a></div><?php else: ?><div class="print-actions text-center mt-3"><button class="btn btn-primary" type="button" onclick="window.print()"><i class="bi bi-filetype-pdf me-1"></i>Guardar como PDF</button></div>
     <script>
         window.addEventListener('load', () => window.print());
     </script><?php endif; ?>
