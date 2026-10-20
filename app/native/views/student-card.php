@@ -11,7 +11,7 @@ ob_start();
         <h1>Mi carnet</h1>
     </div><a class="btn btn-outline-secondary" href="<?= e(app_url('alumnos')) ?>"><i class="bi bi-arrow-left me-1"></i>Alumnos</a>
 </div>
-<?php if ($carnet): ?><?php require __DIR__ . '/card.php'; ?><div class="d-flex justify-content-center gap-2 mt-4"><a class="btn btn-primary" target="_blank" href="<?= e(app_url('verificar/' . rawurlencode($carnet['token_qr']) . '/pdf')) ?>"><i class="bi bi-filetype-pdf me-1"></i>Descargar PDF</a><a class="btn btn-outline-secondary" href="<?= e(app_url('verificar/' . rawurlencode($carnet['token_qr']))) ?>"><i class="bi bi-qr-code-scan me-1"></i>Verificación pública</a></div><?php else: ?><div class="alert alert-warning"><i class="bi bi-exclamation-triangle-fill me-2"></i>El alumno todavía no tiene un carnet emitido.</div><?php endif; ?>
+<?php if ($carnet): ?><?php require __DIR__ . '/card.php'; ?><div class="d-flex justify-content-center gap-2 mt-4"><a class="btn btn-primary" target="_blank" href="<?= e(app_url('verificar/' . rawurlencode($carnet['token_qr']) . '/pdf')) ?>"><i class="bi bi-filetype-pdf me-1"></i>Descargar PDF</a></div><?php else: ?><div class="alert alert-warning"><i class="bi bi-exclamation-triangle-fill me-2"></i>El alumno todavía no tiene un carnet emitido.</div><?php endif; ?>
 <?php if ($carnet && is_admin($user)): ?><section class="card mt-4">
         <div class="card-body">
             <h2 class="h5"><i class="bi bi-arrow-clockwise me-1"></i>Renovar vigencia</h2>
