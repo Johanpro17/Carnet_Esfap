@@ -22,10 +22,8 @@ ob_start();
                 <i class="bi bi-key-fill"></i>
                 <input class="form-control form-control-lg" type="password" name="password" id="password" autocomplete="current-password" placeholder="Tu contraseña" required autofocus>
             </div>
-            <div class="form-text mb-4"><i class="bi bi-info-circle me-1"></i>Los alumnos usan su correo institucional como contraseña.</div>
-            <button class="btn btn-primary btn-lg w-100" type="submit"><i class="bi bi-box-arrow-in-right me-2"></i>Ingresar</button>
+            <button class="btn btn-primary btn-lg w-100 mt-4" type="submit"><i class="bi bi-box-arrow-in-right me-2"></i>Ingresar</button>
         </form>
-        <a class="btn btn-link w-100 mt-3" href="<?= e(app_url('verificar')) ?>"><i class="bi bi-qr-code-scan me-1"></i>Verificación pública de carnets</a>
     </section>
 </div>
 <?php
